@@ -1,11 +1,8 @@
-import fs from "fs"
-import path from "path"
-import { AttachmentBuilder, Client } from "discord.js"
+import { Client } from "discord.js"
 
 import { deployCommands } from "./deploy-commands"
 import { config } from "./config"
 import { commands } from "./commands"
-import { nextIndex } from "./utils/random"
 
 const client = new Client({
   intents: ["Guilds", "GuildMessages", "DirectMessages", "MessageContent"],
@@ -31,33 +28,3 @@ client.on("interactionCreate", async (interaction) => {
     commands[commandName as keyof typeof commands].execute(interaction)
   }
 })
-
-const imagePaths = fs
-  .readdirSync("./images/compressed")
-  .filter((file) => file.endsWith(".jpg"))
-  .map((file) => path.join("./images/compressed", file))
-
-const images = imagePaths.map((imagePath) => new AttachmentBuilder(imagePath))
-
-// send leclerc images
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return
-  if (message.author.username !== targetedUsername) return
-
-  const on_state = fs.readFileSync("./on_state.txt").toString()
-  if (on_state !== "on") return
-
-  const randomImage = images[nextIndex()]
-
-  message.channel.send({
-    content: 'To turn off the bot. Type "/give_steinar_a_break"',
-    files: [randomImage],
-  })
-})
-
-client.login(config.DISCORD_TOKEN)
-
-// make render happy since im hosting there. remove if not
-import http from "http"
-import { targetedUsername } from "./utils/constants"
-http.createServer((_, res) => res.end("ok")).listen(process.env.PORT || 3000)
