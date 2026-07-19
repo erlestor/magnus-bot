@@ -28,3 +28,5 @@ client.on("interactionCreate", async (interaction) => {
     commands[commandName as keyof typeof commands].execute(interaction)
   }
 })
+
+client.login(config.DISCORD_TOKEN)
